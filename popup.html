@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>Verification Codes</title>
+    <script src="popup.js"></script>
     <style>
       body {
         font-family: 'Helvetica Neue', sans-serif;
@@ -19,43 +20,31 @@
         font-weight: bold;
       }
 
-      subtitle {
-        margin: 0;
-        padding: 10px;
-        font-size: 12px;
-        font-weight: bold;
-      }
-
       button {
         display: inline-block;
         width: 100px;
         height: 30px;
-        margin: 10px;
         padding: 5px;
         border: none;
         border-radius: 5px;
         background-color: #fff;
         color: #000;
-        font-size: 14px;
+        font-size: 18px;
         font-weight: bold;
-        cursor: pointer;
+        text-align: center;
       }
 
       button:hover {
         background-color: #eee;
+        cursor: pointer;
       }
+
     </style>
   </head>
     <body>
       <h1>Codes</h1>
-      <subtitle>Click to copy</subtitle>
-      <div>
-        <button>Button 1</button>
-        <button>Button 2</button>
-        <button>Button 3</button>
-        <button>Button 4</button>
-        <button>Button 5</button>
-        <button>Button 6</button>
+      <div id="codes">
+        <button>757124</button>
       </div>
   </body>
 </html>
