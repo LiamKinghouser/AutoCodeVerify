@@ -28,7 +28,7 @@ function base64ToPlainText(text) {
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "requestCodes") {
-        sendResponse({message: codes})
+        sendResponse({ message: JSON.stringify(codes) })
     }
     if (request.action === "updateCodes") {
         codes = JSON.parse(request.text)
@@ -38,6 +38,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 setInterval(function() {
     chrome.action.setBadgeText({text: codes.length.toString()}).then()
 }, 500)
+
+chrome.runtime.sendMessage({
+    msg: "something_completed",
+    data: {
+        subject: "Loading",
+        content: "Just completed!"
+    }
+}).then()
 
 setInterval(function() {
     let input = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&labelIds=INBOX&access_token=' + authToken
@@ -85,8 +93,14 @@ setInterval(function() {
                     }
                     if (message.includes('code')) {
                         console.log(message)
-                        let codes = findVerificationCode(message)
-                        console.log(codes)
+                        let messageCodes = findVerificationCode(message)
+                        console.log(messageCodes)
+
+                        for (let i = 0; i < messageCodes.length; i++) {
+                            codes.push(messageCodes[i])
+                        }
+
+                        sendCodes()
                     }
                 })
         })
