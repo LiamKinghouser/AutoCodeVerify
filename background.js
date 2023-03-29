@@ -46,6 +46,7 @@ setInterval(function() {
 
     // get messages that fit criteria: unread, received after (10 seconds ago), in inbox
     let input = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&after:${time}&labelIds=INBOX&access_token=${authToken}`
+    console.log(input)
 
     fetch(input)
         .then((response) => response.json())
