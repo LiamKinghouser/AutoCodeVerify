@@ -44,7 +44,7 @@ setInterval(function() {
     let time = Date.now() - (10 * 1000)
     console.log(time)
 
-    // get messages who fit criteria: unread, received after (10 seconds ago), in inbox
+    // get messages that fit criteria: unread, received after (10 seconds ago), in inbox
     let input = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&after:${time}&labelIds=INBOX&access_token=${authToken}`
 
     fetch(input)
