@@ -11,12 +11,8 @@ chrome.identity.getAuthToken({'interactive': true}, function(token) {
 })
 
 function findVerificationCode(emailBody) {
-    const regex = /\b\d{5,6}\b/g
-    const codes = emailBody.match(regex)
-    if (codes && codes.length > 0) {
-        return codes
-    }
-    return null
+    const regex = /\b\d{6}\b/g
+    return emailBody.match(regex)
 }
 
 function base64ToPlainText(text) {
@@ -31,24 +27,25 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         sendResponse({ message: JSON.stringify(codes) })
     }
     if (request.action === "updateCodes") {
-        codes = JSON.parse(request.text)
+        codes = JSON.parse(request.message)
+        updateExtensionBadge()
     }
 })
 
-setInterval(function() {
-    chrome.action.setBadgeText({text: codes.length.toString()}).then()
-}, 500)
-
-chrome.runtime.sendMessage({
-    msg: "something_completed",
-    data: {
-        subject: "Loading",
-        content: "Just completed!"
-    }
-}).then()
+function updateExtensionBadge() {
+    if (codes.length > 0) chrome.action.setBadgeText({text: codes.length.toString()}).then()
+    else chrome.action.setBadgeText({text: ''}).then()
+}
 
 setInterval(function() {
-    let input = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&labelIds=INBOX&access_token=' + authToken
+    if (authToken === undefined) return
+
+    // 10 seconds ago
+    let time = Date.now() - (10 * 1000)
+    console.log(time)
+
+    // get messages who fit criteria: unread, received after (10 seconds ago), in inbox
+    let input = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&after:${time}&labelIds=INBOX&access_token=${authToken}`
 
     fetch(input)
         .then((response) => response.json())
@@ -93,15 +90,14 @@ setInterval(function() {
                     }
                     if (message.includes('code')) {
                         console.log(message)
+
                         let messageCodes = findVerificationCode(message)
-                        console.log(messageCodes)
 
                         for (let i = 0; i < messageCodes.length; i++) {
                             codes.push(messageCodes[i])
                         }
-
-                        sendCodes()
+                        updateExtensionBadge()
                     }
                 })
         })
-}, 5000)
+}, 1000)
