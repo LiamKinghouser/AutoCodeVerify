@@ -45,6 +45,7 @@ chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
 
                 // copy code to clipboard
                 copyToClipboard(element.textContent).then()
+
                 // notify user
                 element.textContent = 'Copied!'
 

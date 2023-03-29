@@ -10,7 +10,7 @@
   "version": "1.0.0",
   "manifest_version": 3,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCNZbkUeNxK1lSrlRTz33Qcaz/x4wvmWaaMdNkzQ5adIYGviT+ElO3MToWuFVV4fzL0PwDIasEPqo3mbBEh4TrdbIBn1tNiK9YnCIoxZOiIZedTxxu0QlPrJTq5Z5Wq/Zh1y/l2cZwirfa1eSIyZkOq28YS7eT8NZCSdzEM/IHKnXvIzwpac7Sfvhi8uAg+M2c7EyAl+4fNGke7Rtv91CeO9Ggmtusf/r/fbrC48vrPca4/vl6LHpWeQFb63yUD9AHqNu32KWPUzoIHK01XMk+yZ6o5teZ+Vt1nwq6tIn7LbR1hh77fm3PsLtPf1Ah7w2C52K9zOa1pJxokH7/IxVwIDAQAB",
-  "permissions": ["tabs", "scripting", "notifications", "clipboardWrite", "background", "nativeMessaging","identity", "identity.email"],
+  "permissions": ["tabs", "scripting", "clipboardWrite", "background", "nativeMessaging", "identity", "identity.email"],
   "action": {
     "default_icon": {
       "16": "images/icon.png",
