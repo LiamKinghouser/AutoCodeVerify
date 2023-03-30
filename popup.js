@@ -29,7 +29,7 @@ chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
         let codes = JSON.parse(response.message)
 
         // if there are no codes, close window
-        if (codes.length === 0) window.close()
+        // if (codes.length === 0) window.close()
 
         for (let i = 0; i < codes.length; i++) {
             appendCode(codes[i])

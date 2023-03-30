@@ -1,3 +1,5 @@
+let active = false
+
 let authToken
 
 let checkedMessages = []
@@ -23,6 +25,12 @@ function base64ToPlainText(text) {
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === 'start') {
+
+    }
+    if (request.action === 'stop') {
+
+    }
     if (request.action === "requestCodes") {
         sendResponse({ message: JSON.stringify(codes) })
     }
