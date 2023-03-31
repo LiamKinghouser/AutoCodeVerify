@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title></title>
     <meta charset="UTF-8">
     <script src="popup.js"></script>
     <style>
@@ -39,10 +40,23 @@
         cursor: pointer;
       }
 
+      #toggle-button {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: none;
+        outline: none;
+        background-color: green;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease-in-out;
+      }
+
     </style>
   </head>
     <body>
-      <h1>Codes</h1>
+      <button id="toggle-button"></button>
       <div id="codes"></div>
   </body>
 </html>

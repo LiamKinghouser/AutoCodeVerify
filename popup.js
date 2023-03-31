@@ -8,6 +8,10 @@ async function copyToClipboard(text) {
     }
 }
 
+function toggle() {
+    chrome.runtime.sendMessage({ action: 'toggle' }).then()
+}
+
 function appendCode(code) {
     // add code to codes array
     codes.push(code)
@@ -17,6 +21,39 @@ function appendCode(code) {
     button.textContent = code
     document.getElementById('codes').appendChild(button)
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    let toggleButton = document.getElementById('toggle-button')
+    toggleButton.style.backgroundColor = 'green'
+    toggleButton.addEventListener('click', function() {
+        console.log('clicked')
+        toggleButton.style.backgroundColor = toggleButton.style.backgroundColor === 'green' ? 'red' : 'green'
+        toggle()
+    })
+})
+
+// check status of background script when popup opened
+chrome.runtime.sendMessage({ action: 'checkStatus' }, function(response) {
+    if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError.message)
+        return
+    }
+
+    if (response && response.message) {
+        let active = response.message
+
+        if (active) {
+
+        }
+        else {
+            let header = document.createElement('div')
+            header.innerText = 'Disabled'
+            document.appendChild(header)
+        }
+    } else {
+        console.error('No response received from background script.')
+    }
+})
 
 // request and display codes from background when popup is opened
 chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
