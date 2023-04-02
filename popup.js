@@ -8,10 +8,6 @@ async function copyToClipboard(text) {
     }
 }
 
-function toggle() {
-    chrome.runtime.sendMessage({ action: 'toggle' }).then()
-}
-
 function appendCode(code) {
     // add code to codes array
     codes.push(code)
@@ -22,80 +18,63 @@ function appendCode(code) {
     document.getElementById('codes').appendChild(button)
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    let toggleButton = document.getElementById('toggle-button')
-    toggleButton.style.backgroundColor = 'green'
-    toggleButton.addEventListener('click', function() {
-        console.log('clicked')
-        toggleButton.style.backgroundColor = toggleButton.style.backgroundColor === 'green' ? 'red' : 'green'
-        toggle()
-    })
-})
-
 // check status of background script when popup opened
 chrome.runtime.sendMessage({ action: 'checkStatus' }, function(response) {
     if (chrome.runtime.lastError) {
+        window.close()
         console.error(chrome.runtime.lastError.message)
         return
     }
 
     if (response && response.message) {
-        let active = response.message
+        let active = JSON.parse(response.message)
 
         if (active) {
+            // request and display codes
+            chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
+                if (chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message)
+                    return
+                }
 
-        }
-        else {
-            let header = document.createElement('div')
-            header.innerText = 'Disabled'
-            document.appendChild(header)
-        }
-    } else {
-        console.error('No response received from background script.')
-    }
-})
+                if (response && response.message) {
+                    let codes = JSON.parse(response.message)
 
-// request and display codes from background when popup is opened
-chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
-    if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError.message)
-        return
-    }
+                    for (let i = 0; i < codes.length; i++) {
+                        appendCode(codes[i])
+                    }
 
-    if (response && response.message) {
-        let codes = JSON.parse(response.message)
+                    let elements = document.getElementById('codes').children
 
-        // if there are no codes, close window
-        // if (codes.length === 0) window.close()
+                    for (let i = 0; i < elements.length; i++) {
+                        let element = elements[i]
+                        element.addEventListener('click', function() {
+                            // remove code from codes array (code copied, so user has 'used' code)
+                            codes.splice(codes.indexOf(element.textContent.toString()), 1)
 
-        for (let i = 0; i < codes.length; i++) {
-            appendCode(codes[i])
-        }
+                            // copy code to clipboard
+                            copyToClipboard(element.textContent).then()
 
-        let elements = document.getElementById('codes').children
+                            // notify user
+                            element.textContent = 'Copied!'
 
-        for (let i = 0; i < elements.length; i++) {
-            let element = elements[i]
-            element.addEventListener('click', function() {
-                // remove code from codes array (code copied, so user has 'used' code)
-                codes.splice(codes.indexOf(element.textContent.toString()), 1)
+                            // send updated codes list to background script
+                            chrome.runtime.sendMessage({ action: 'updateCodes', message: JSON.stringify(codes) }).then()
 
-                // copy code to clipboard
-                copyToClipboard(element.textContent).then()
-
-                // notify user
-                element.textContent = 'Copied!'
-
-                // send updated codes list to background script
-                chrome.runtime.sendMessage({ action: 'updateCodes', message: JSON.stringify(codes) }).then()
-
-                // close popup (increase usability/efficiency)
-                setTimeout(function() {
-                    window.close()
-                }, 1000)
+                            // close popup (increase usability/efficiency)
+                            setTimeout(function() {
+                                window.close()
+                            }, 1000)
+                        })
+                    }
+                } else {
+                    console.error('No response received from background script.')
+                }
             })
         }
+        else window.close()
     } else {
+        window.close()
         console.error('No response received from background script.')
     }
 })

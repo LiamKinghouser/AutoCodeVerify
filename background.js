@@ -8,11 +8,65 @@ let codes = []
 
 let emailListener
 
-chrome.action.setBadgeBackgroundColor({color: "#eed812"}).then()
+chrome.runtime.onInstalled.addListener(function(details) {
+    if (details.reason === "install") {
+        // set background color of extension icon
+        chrome.action.setBadgeBackgroundColor({color: "#eed812"}).then()
 
-chrome.identity.getAuthToken({'interactive': true}, function(token) {
-    authToken = token
+        // get auth token of google user
+        chrome.identity.getAuthToken({'interactive': true}, function(token) {
+            authToken = token
+        })
+
+        // add toggle button to right-click menu of extension icon
+        chrome.contextMenus.create({
+            id: 'toggle-listener',
+            title: 'Enable Listener',
+            contexts: ['action']
+        })
+
+        // toggle the listener when the button is clicked
+        chrome.contextMenus.onClicked.addListener(info => {
+            if (info.menuItemId === 'toggle-listener') {
+                toggle()
+            }
+        })
+    }
 })
+
+// add message listeners
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === 'checkStatus') {
+        console.log('hie')
+        sendResponse({ message: JSON.stringify(active)})
+    }
+    if (request.action === "requestCodes") {
+        sendResponse({ message: JSON.stringify(codes) })
+    }
+    if (request.action === "updateCodes") {
+        codes = JSON.parse(request.message)
+        updateExtensionBadge()
+    }
+})
+
+function toggle() {
+    active = !active
+    chrome.contextMenus.update('toggle-listener', {
+        title: (active ? 'Disable Listener' : 'Enable Listener')
+    })
+    if (active) {
+        chrome.action.setIcon({
+            path: 'icons/icon_128.png'
+        })
+        startListener()
+    }
+    else {
+        chrome.action.setIcon({
+            path: 'icons/icon_inactive_128.png'
+        })
+        clearInterval(emailListener)
+    }
+}
 
 function findVerificationCode(emailBody) {
     const regex = /\b\d{6}\b/g
@@ -26,29 +80,6 @@ function base64ToPlainText(text) {
     return atob(text)
 }
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === 'toggle') {
-        if (active) {
-            active = false
-            clearInterval(emailListener)
-        }
-        else {
-            active = true
-            startListener()
-        }
-    }
-    if (request.action === 'checkStatus') {
-        sendResponse({ message: active})
-    }
-    if (request.action === "requestCodes") {
-        sendResponse({ message: JSON.stringify(codes) })
-    }
-    if (request.action === "updateCodes") {
-        codes = JSON.parse(request.message)
-        updateExtensionBadge()
-    }
-})
-
 function updateExtensionBadge() {
     if (codes.length > 0) chrome.action.setBadgeText({text: codes.length.toString()}).then()
     else chrome.action.setBadgeText({text: ''}).then()
@@ -60,7 +91,6 @@ function startListener() {
 
         // 10 seconds ago
         let time = Date.now() - (10 * 1000)
-        console.log(time)
 
         // get messages that fit criteria: unread, received after (10 seconds ago), in inbox
         let input = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&after:${time}&labelIds=INBOX&access_token=${authToken}`
