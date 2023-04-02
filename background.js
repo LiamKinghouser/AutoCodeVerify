@@ -8,10 +8,12 @@ let codes = []
 
 let emailListener
 
+let timeout
+
 chrome.runtime.onInstalled.addListener(function(details) {
     if (details.reason === "install" || details.reason === 'update') {
         // set background color of extension icon
-        chrome.action.setBadgeBackgroundColor({color: "#eed812"}).then()
+        chrome.browserAction.setBadgeBackgroundColor({color: "#eed812"})
 
         // get auth token of google user
         chrome.identity.getAuthToken({'interactive': true}, function(token) {
@@ -22,12 +24,8 @@ chrome.runtime.onInstalled.addListener(function(details) {
         chrome.contextMenus.create({
             id: 'toggle-listener',
             title: 'Enable Listener',
-            contexts: ['action']
-        })
-
-        // toggle the listener when the button is clicked
-        chrome.contextMenus.onClicked.addListener(info => {
-            if (info.menuItemId === 'toggle-listener') {
+            contexts: ['browser_action'],
+            onclick: function() {
                 toggle()
             }
         })
@@ -55,15 +53,16 @@ function toggle() {
         title: (active ? 'Disable Listener' : 'Enable Listener')
     })
     if (active) {
-        chrome.action.setIcon({
+        chrome.browserAction.setIcon({
             path: 'icons/icon_128.png'
         })
         startListener()
     }
     else {
-        chrome.action.setIcon({
+        chrome.browserAction.setIcon({
             path: 'icons/icon_inactive_128.png'
         })
+        clearInterval(timeout)
         clearInterval(emailListener)
     }
 }
@@ -81,14 +80,13 @@ function base64ToPlainText(text) {
 }
 
 function updateExtensionBadge() {
-    if (codes.length > 0) chrome.action.setBadgeText({text: codes.length.toString()}).then()
-    else chrome.action.setBadgeText({text: ''}).then()
+    if (codes.length > 0) chrome.browserAction.setBadgeText({text: codes.length.toString()})
+    else chrome.browserAction.setBadgeText({text: ''})
 }
 
 function startListener() {
     // stop listening for emails after 10 seconds
-    setTimeout(function () {
-        clearInterval(emailListener)
+    timeout = setTimeout(function () {
         toggle()
     }, (10 * 1000))
 
@@ -152,8 +150,11 @@ function startListener() {
 
                             for (let i = 0; i < messageCodes.length; i++) {
                                 codes.push(messageCodes[i])
+                                console.log(messageCodes[i])
                             }
                             updateExtensionBadge()
+
+                            toggle()
                         }
                     })
             })

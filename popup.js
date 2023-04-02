@@ -39,7 +39,7 @@ chrome.runtime.sendMessage({ action: 'checkStatus' }, function(response) {
             if (response && response.message) {
                 let codes = JSON.parse(response.message)
 
-                if (codes.length === 0 && !active) {
+                if (codes.length === 0) {
                     window.close()
                     return
                 }
@@ -63,7 +63,7 @@ chrome.runtime.sendMessage({ action: 'checkStatus' }, function(response) {
                         element.textContent = 'Copied!'
 
                         // send updated codes list to background script
-                        chrome.runtime.sendMessage({ action: 'updateCodes', message: JSON.stringify(codes) }).then()
+                        chrome.runtime.sendMessage({ action: 'updateCodes', message: JSON.stringify(codes) })
 
                         // close popup (increase usability/efficiency)
                         setTimeout(function() {
