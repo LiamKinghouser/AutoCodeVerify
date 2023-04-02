@@ -29,50 +29,52 @@ chrome.runtime.sendMessage({ action: 'checkStatus' }, function(response) {
     if (response && response.message) {
         let active = JSON.parse(response.message)
 
-        if (active) {
-            // request and display codes
-            chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError.message)
+        // request and display codes
+        chrome.runtime.sendMessage({ action: 'requestCodes' }, function(response) {
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError.message)
+                return
+            }
+
+            if (response && response.message) {
+                let codes = JSON.parse(response.message)
+
+                if (codes.length === 0 && !active) {
+                    window.close()
                     return
                 }
 
-                if (response && response.message) {
-                    let codes = JSON.parse(response.message)
-
-                    for (let i = 0; i < codes.length; i++) {
-                        appendCode(codes[i])
-                    }
-
-                    let elements = document.getElementById('codes').children
-
-                    for (let i = 0; i < elements.length; i++) {
-                        let element = elements[i]
-                        element.addEventListener('click', function() {
-                            // remove code from codes array (code copied, so user has 'used' code)
-                            codes.splice(codes.indexOf(element.textContent.toString()), 1)
-
-                            // copy code to clipboard
-                            copyToClipboard(element.textContent).then()
-
-                            // notify user
-                            element.textContent = 'Copied!'
-
-                            // send updated codes list to background script
-                            chrome.runtime.sendMessage({ action: 'updateCodes', message: JSON.stringify(codes) }).then()
-
-                            // close popup (increase usability/efficiency)
-                            setTimeout(function() {
-                                window.close()
-                            }, 1000)
-                        })
-                    }
-                } else {
-                    console.error('No response received from background script.')
+                for (let i = 0; i < codes.length; i++) {
+                    appendCode(codes[i])
                 }
-            })
-        }
-        else window.close()
+
+                let elements = document.getElementById('codes').children
+
+                for (let i = 0; i < elements.length; i++) {
+                    let element = elements[i]
+                    element.addEventListener('click', function() {
+                        // remove code from codes array (code copied, so user has 'used' code)
+                        codes.splice(codes.indexOf(element.textContent.toString()), 1)
+
+                        // copy code to clipboard
+                        copyToClipboard(element.textContent).then()
+
+                        // notify user
+                        element.textContent = 'Copied!'
+
+                        // send updated codes list to background script
+                        chrome.runtime.sendMessage({ action: 'updateCodes', message: JSON.stringify(codes) }).then()
+
+                        // close popup (increase usability/efficiency)
+                        setTimeout(function() {
+                            window.close()
+                        }, 1000)
+                    })
+                }
+            } else {
+                console.error('No response received from background script.')
+            }
+        })
     } else {
         window.close()
         console.error('No response received from background script.')

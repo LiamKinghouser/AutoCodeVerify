@@ -9,7 +9,7 @@ let codes = []
 let emailListener
 
 chrome.runtime.onInstalled.addListener(function(details) {
-    if (details.reason === "install") {
+    if (details.reason === "install" || details.reason === 'update') {
         // set background color of extension icon
         chrome.action.setBadgeBackgroundColor({color: "#eed812"}).then()
 
@@ -86,6 +86,13 @@ function updateExtensionBadge() {
 }
 
 function startListener() {
+    // stop listening for emails after 10 seconds
+    setTimeout(function () {
+        clearInterval(emailListener)
+        toggle()
+    }, (10 * 1000))
+
+    // email listener
     emailListener = setInterval(function() {
         if (authToken === undefined) return
 
@@ -141,6 +148,7 @@ function startListener() {
                             console.log(message)
 
                             let messageCodes = findVerificationCode(message)
+                            if (messageCodes === null || messageCodes === undefined) return
 
                             for (let i = 0; i < messageCodes.length; i++) {
                                 codes.push(messageCodes[i])
