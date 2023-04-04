@@ -19,18 +19,22 @@ chrome.runtime.onInstalled.addListener(function(details) {
         chrome.identity.getAuthToken({'interactive': true}, function(token) {
             authToken = token
         })
-
-        // add toggle button to right-click menu of extension icon
-        chrome.contextMenus.create({
-            id: 'toggle-listener',
-            title: 'Enable Listener',
-            contexts: ['browser_action'],
-            onclick: function() {
-                toggle()
-            }
-        })
     }
 })
+
+// add toggle button to right-click menu of extension icon
+chrome.contextMenus.create({
+    id: 'toggle-listener',
+    title: 'Enable Listener',
+    contexts: ['browser_action'],
+    onclick: function() {
+        toggle()
+    }
+})
+
+chrome.runtime.onSuspend.addListener(function() {
+    chrome.contextMenus.remove("myContextMenuButtonId");
+});
 
 // add message listeners
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
