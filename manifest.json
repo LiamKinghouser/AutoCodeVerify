@@ -10,7 +10,7 @@
   "version": "1.0.0",
   "manifest_version": 2,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCNZbkUeNxK1lSrlRTz33Qcaz/x4wvmWaaMdNkzQ5adIYGviT+ElO3MToWuFVV4fzL0PwDIasEPqo3mbBEh4TrdbIBn1tNiK9YnCIoxZOiIZedTxxu0QlPrJTq5Z5Wq/Zh1y/l2cZwirfa1eSIyZkOq28YS7eT8NZCSdzEM/IHKnXvIzwpac7Sfvhi8uAg+M2c7EyAl+4fNGke7Rtv91CeO9Ggmtusf/r/fbrC48vrPca4/vl6LHpWeQFb63yUD9AHqNu32KWPUzoIHK01XMk+yZ6o5teZ+Vt1nwq6tIn7LbR1hh77fm3PsLtPf1Ah7w2C52K9zOa1pJxokH7/IxVwIDAQAB",
-  "permissions": ["clipboardWrite", "background", "nativeMessaging", "identity", "identity.email", "contextMenus"],
+  "permissions": ["clipboardWrite", "background", "nativeMessaging", "identity", "identity.email", "contextMenus", "storage"],
   "browser_action": {
     "default_icon": {
       "16": "icons/icon_inactive.png",
@@ -21,8 +21,7 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "scripts": [ "background.js" ],
-    "persistent": true
+    "scripts": [ "background.js" ]
   },
   "oauth2": {
     "client_id": "381312554886-t9b8b0dsnrijnbc9i69j0g8ocgc7jd62.apps.googleusercontent.com",

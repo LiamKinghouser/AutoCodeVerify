@@ -10,31 +10,33 @@ let emailListener
 
 let timeout
 
-chrome.runtime.onInstalled.addListener(function(details) {
-    if (details.reason === "install" || details.reason === 'update') {
-        // set background color of extension icon
-        chrome.browserAction.setBadgeBackgroundColor({color: "#eed812"})
-
-        // get auth token of google user
-        chrome.identity.getAuthToken({'interactive': true}, function(token) {
-            authToken = token
-        })
-    }
-})
-
 // add toggle button to right-click menu of extension icon
 chrome.contextMenus.create({
     id: 'toggle-listener',
     title: 'Enable Listener',
     contexts: ['browser_action'],
+    enabled: false,
     onclick: function() {
         toggle()
     }
 })
 
-chrome.runtime.onSuspend.addListener(function() {
-    chrome.contextMenus.remove("myContextMenuButtonId");
-});
+// add change user button to right-click menu of extension icon
+chrome.contextMenus.create({
+    id: 'change-user',
+    title: 'Change User',
+    contexts: ['browser_action'],
+    onclick: function() {
+        setUser()
+    }
+})
+
+// alert user that no user is set
+chrome.browserAction.setBadgeBackgroundColor({color: "#ec0000"})
+chrome.browserAction.setBadgeText({text: '!'})
+
+// attempt to set user
+setUser()
 
 // add message listeners
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -71,12 +73,27 @@ function toggle() {
     }
 }
 
+function setUser() {
+    chrome.identity.getAuthToken({interactive: true}, function(token) {
+        if (chrome.runtime.lastError) {
+            console.log('User did not approve access.')
+        } else {
+            authToken = token
+            chrome.contextMenus.update('toggle-listener', {
+                enabled: true
+            })
+            chrome.browserAction.setBadgeBackgroundColor({color: "#eed812"})
+            chrome.browserAction.setBadgeText({text: ''})
+        }
+    })
+}
+
 function findVerificationCode(emailBody) {
     const regex = /\b\d{6}\b/g
     return emailBody.match(regex)
 }
 
-function base64ToPlainText(text) {
+function base64ToPlainText(text) {p
     text = text.replaceAll('-','+')
     text = text.replaceAll('_','/')
 
@@ -89,21 +106,21 @@ function updateExtensionBadge() {
 }
 
 function startListener() {
-    // stop listening for emails after 10 seconds
+    // stop listening for emails after 30 seconds
     timeout = setTimeout(function () {
         toggle()
-    }, (10 * 1000))
+    }, (30 * 1000))
 
     // email listener
     emailListener = setInterval(function() {
+        console.log(authToken)
         if (authToken === undefined) return
 
         // 10 seconds ago
-        let time = Date.now() - (10 * 1000)
+        let time = Date.now() - (30 * 1000)
 
         // get messages that fit criteria: unread, received after (10 seconds ago), in inbox
         let input = `https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=1&q=is:unread&after:${time}&labelIds=INBOX&access_token=${authToken}`
-        console.log(input)
 
         fetch(input)
             .then((response) => response.json())
@@ -146,6 +163,7 @@ function startListener() {
                                 message = html.replace(regex, "")
                             }
                         }
+                        console.log(message)
                         if (message.includes('code')) {
                             console.log(message)
 
